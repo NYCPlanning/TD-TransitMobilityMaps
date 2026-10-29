@@ -1,28 +1,71 @@
-name: Rotate Mapbox Token
+name: Deploy Maps
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 jobs:
-  update-token:
+  deploy:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
-      - name: Encode and inject Mapbox token
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Prepare website and Mapbox configuration
         env:
           MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
         run: |
-          cp mapbox/config.template.json mapbox/config.json
-          ENCODED_TOKEN=$(echo -n "$MAPBOX_TOKEN" | base64 | tr -d '\n')
-          jq --arg token "$ENCODED_TOKEN" 'walk(if type == "string" then gsub("\\$\\{MAPBOX_TOKEN\\}"; $token) else . end)' \
-            mapbox/config.json > mapbox/config.tmp.json
-          mv mapbox/config.tmp.json mapbox/config.json
+          mkdir -p _site/mapbox
 
-      - name: Commit and push changes
-        uses: EndBug/add-and-commit@v9
+          cp -R \
+            Transit-Connectivity-Job-Access-main \
+            Transit-Connectivity-Land-Area-main \
+            job-access-only-main \
+            land-area-only-main \
+            _site/
+
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          token = os.environ.get("MAPBOX_TOKEN", "").strip()
+
+          if not token.startswith("pk."):
+              raise SystemExit(
+                  "MAPBOX_TOKEN must be a public Mapbox token starting with pk."
+              )
+
+          Path("_site/mapbox/config.js").write_text(
+              "mapboxgl.accessToken = " + json.dumps(token) + ";\n",
+              encoding="utf-8",
+          )
+          PY
+
+      - name: Upload website
+        uses: actions/upload-pages-artifact@v4
         with:
-          add: 'mapbox/config.json'
-          message: 'Rotate Mapbox token'
+          path: _site
+
+      - name: Deploy website
+        id: deployment
+        uses: actions/deploy-pages@v4
