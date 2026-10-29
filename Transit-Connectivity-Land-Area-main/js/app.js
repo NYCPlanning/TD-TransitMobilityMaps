@@ -1,8 +1,6 @@
 // ============================================================
 // CONFIG
 // ============================================================
-mapboxgl.accessToken = 'pk.eyJ1Ijoic3BpZXJyZTE0IiwiYSI6ImNtdHg1MXFyNjAxanUyd3B0Zmppd3pldjMifQ.N_SDvISpQJo1gDuuOetnmQ';
-
 const FULL_SERVICE_FILE = 'data/Land_Area_Full_Service.min.geojson';
 const LIMITED_FARE_FILE = 'data/Land_Area_Limited_Fare.min.geojson';
 const ROUTES_FILE = 'data/routes_subway_SIR_Path_LIRR_MNR.min.geojson';
