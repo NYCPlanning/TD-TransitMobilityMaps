@@ -1,8 +1,6 @@
 // ============================================================
 // CONFIG
 // ============================================================
-mapboxgl.accessToken = 'pk.eyJ1Ijoic3BpZXJyZTE0IiwiYSI6ImNtdHg1MXFyNjAxanUyd3B0Zmppd3pldjMifQ.N_SDvISpQJo1gDuuOetnmQ';
-
 const DATA_FILE = 'data/Jobs_Full_Service.min.geojson';
 const STATIONS_FILE = 'data/rail_transit_stations.geojson';
 const ROUTES_FILE = 'data/routes_subway_SIR_Path_LIRR_MNR.min.geojson';
